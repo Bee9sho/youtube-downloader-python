@@ -6,8 +6,7 @@ def ensure_dir(directory):
         os.makedirs(directory)
 
 def list_resolutions(youtube):
-    """ 
-    
+    """
     list availabe resolutions only """
     streams = youtube.streams.filter(progressive = True).order_by('resolution').desc()
     available_resolutions = [stream.resolution for stream in streams]
