@@ -27,6 +27,7 @@ def download_video_with_resolution(youtube, resolution, download_directory, log_
     else:
         print(f'Resolution {resolution} not available.')
 
+ 
     
 def parse_resolution_input(input_str):
     if 'p' in input_str:
