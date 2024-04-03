@@ -88,13 +88,13 @@ def download_youtube_video():
             else:
                 youtube = YouTube(video_url)
                 print(f"Video title: {youtube.title}\n")
-                download_type = input("Choose download type: Enter '1' for single video, '2' for entire playlist, or '3' for MP3 audio: ")
+                download_type = input("Choose download type: Enter '1' for single video, '2' for MP3 audio: ")
                 if download_type == '1':
                     download_single_video(youtube, download_directory, log_file_path)
-                elif download_type == '3':
+                elif download_type == '2':
                     download_audio_only(youtube, download_directory, log_file_path)
                 else:
-                    print("Invalid choice. Please enter '1' for a single video or '3' for MP3 audio.")
+                    print("Invalid choice. Please enter '1' for a single video or '2' for MP3 audio.")
 
         except Exception as e:
             print(f'An error occurred: {e}')
