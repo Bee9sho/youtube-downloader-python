@@ -42,14 +42,23 @@ def download_single_video(youtube, download_directory, log_file_path):
     download_video_with_resolution(youtube, resolution, download_directory, log_file_path)
 
 def download_entire_playlist(playlist_url, download_directory, log_file_path):
-    playlist = Playlist(playlist_url)
-    print(f'Downloading playlist: {playlist.title}')
-    for video in playlist.videos:
-        try:
-            # Ensure the resolution argument is provided correctly, set to None for highest resolution
-            download_video_with_resolution(video, None, download_directory, log_file_path)
-        except Exception as e:
-            print(f'An error occurred while downloading video from the playlist: {e}')
+    try:
+        playlist = Playlist(playlist_url)
+        # Force an interaction to trigger potential 'sidebar' error early
+        _ = playlist.title
+        print(f'Downloading playlist: {playlist.title}')
+        for video in playlist.videos:
+            try:
+                download_video_with_resolution(video, None, download_directory, log_file_path)
+            except Exception as video_error:
+                print(f'An error occurred while downloading a video from the playlist: {video_error}')
+    except Exception as e:
+        if 'sidebar' in str(e).lower():
+            print("An error occurred: Please make sure your playlist is public.")
+        else:
+            print(f'An error occurred while accessing the playlist: {e}')
+
+
 
 def download_audio_only(youtube, download_directory, log_file_path):
     audio_stream = youtube.streams.filter(only_audio=True).first()
