@@ -1,5 +1,8 @@
 import os
+import re
 from pytube import YouTube, Playlist
+from pytube.cli import on_progress
+
 
 def ensure_directory(directory_path):
     if not os.path.exists(directory_path):
@@ -12,33 +15,29 @@ def get_available_resolutions(youtube):
     return unique_resolutions
 
 def download_video_with_resolution(youtube, resolution, download_directory, log_file_path):
-    if resolution is None:
-        # auto choose the heighest reso
-        video_stream = youtube.streams.filter(progressive=True).order_by('resolution').desc().first()
+    youtube.register_on_progress_callback(on_progress)
+    if resolution is None or resolution == "auto":
+        video_stream = youtube.streams.get_highest_resolution()
     else:
         video_stream = youtube.streams.filter(res=resolution, progressive=True).first()
     
     if video_stream:
         output_path = video_stream.download(output_path=download_directory)
-        print(f'Downloaded: {youtube.title} in {video_stream.resolution} to {download_directory}')
+        print(f'\nDownloaded: {youtube.title} in {video_stream.resolution} to {download_directory}\n')
 
         with open(log_file_path, 'a', encoding='utf-8') as log_file:
             log_file.write(f"Title: {youtube.title}\nURL: {youtube.watch_url}\nResolution: {video_stream.resolution}\nDownload Path: {output_path}\n\n")
     else:
-        print(f'Resolution {resolution} not available.')
+        print(f'\nResolution {resolution} not available.\n')
 
-    
 def parse_resolution_input(input_str):
-    if 'p' in input_str:
-        return int(input_str.replace('p', ''))
-    else:
-        return int(input_str)
+    return input_str.replace('p', '') + 'p' if input_str else "auto"
 
 def download_single_video(youtube, download_directory, log_file_path):
     resolutions = get_available_resolutions(youtube)
     print("Available resolutions:", ", ".join(resolutions))
-    resolution_choice = input("Enter desired resolution (e.g., 720p): ")
-    resolution = f"{parse_resolution_input(resolution_choice)}p"
+    resolution_choice = input("Enter desired resolution (e.g., 720p) or press enter for highest: ")
+    resolution = parse_resolution_input(resolution_choice)
     download_video_with_resolution(youtube, resolution, download_directory, log_file_path)
 
 def download_entire_playlist(playlist_url, download_directory, log_file_path):
